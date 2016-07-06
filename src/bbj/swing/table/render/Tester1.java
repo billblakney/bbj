@@ -9,9 +9,9 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
  
-public class Tester extends JFrame
+public class Tester1 extends JFrame
 {
-    public Tester()
+    public Tester1()
     {
         //headers for the table
         String[] columns = new String[] {
@@ -21,7 +21,7 @@ public class Tester extends JFrame
         //actual data for the table in a 2d array
         Object[][] data = new Object[][] {
             {1, "John", 40.0, false, 1000000 },
-            {2, "Rambo", 70.0, false, 599000 },
+            {2, "Rambo", 170.0, false, 599000 },
             {3, "Zorro", 60.0, true, 35 },
             {4, "Chance", 90.0, true, 4500 },
             {5, "Stanley", 110.0, false, 4045998 },
@@ -30,14 +30,17 @@ public class Tester extends JFrame
         //create table with data
         JTable tTable = new JTable(data, columns);
 
-        Vector<RenderTableCellInfo> tRenderInfo = new Vector<RenderTableCellInfo>();
+        Vector<RenderRule> tRenderInfo = new Vector<RenderRule>();
         
         /*
          * Render integer in column 4 with commas.
          */
-        RenderInteger tRenderInteger = new RenderInteger(RenderInteger.COMMA_FORMAT,4);
+        RenderIntegerRule tRenderInteger = new RenderIntegerRule(RenderIntegerRule.COMMA_FORMAT,4);
         tRenderInfo.add(tRenderInteger);
 
+        /*
+         * Render alternating rows with different color.
+         */
         Vector<TableCellColorSet> tColorSets = new Vector<TableCellColorSet>();
         TableCellColorSet tSet1 = TableCellColorSet.kDefaultColorSet1;
         TableCellColorSet tSet2 = TableCellColorSet.kDefaultColorSet2;
@@ -48,7 +51,7 @@ public class Tester extends JFrame
               boolean isSelected, boolean hasFocus, int row, int column)
               -> { return row % 2;};
 
-        RenderColoredRows tRenderRows = new RenderColoredRows(tColorSets,tRowChooser);
+        RenderColorsRule tRenderRows = new RenderColorsRule(tColorSets,tRowChooser);
         tRenderInfo.add(tRenderRows);
         /*
          * Add render info to the custom renderer.
@@ -74,7 +77,7 @@ public class Tester extends JFrame
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Tester();
+                new Tester1();
             }
         });
     }   

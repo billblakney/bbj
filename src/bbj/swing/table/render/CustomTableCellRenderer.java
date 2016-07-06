@@ -8,6 +8,13 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
+/**
+ * A renderer for cells in a table that are labels.
+ * <p>
+ * The renderer is constructed with a set of "render rules", each of which may
+ * provide table cell info for drawing a table cell. The rules are applied in
+ * the order that they appear in the list of render rules.
+ */
 @SuppressWarnings("serial")
 public class CustomTableCellRenderer extends JLabel
                                      implements TableCellRenderer {
@@ -19,20 +26,35 @@ public class CustomTableCellRenderer extends JLabel
 //		_defaultForegroundColor = UIManager.getColor ( "Panel.foreground" );
    
    
-   Vector<RenderTableCellInfo> _fontSetters = new Vector<RenderTableCellInfo>();
+   Vector<RenderRule> _renderRules = new Vector<RenderRule>();
 	
-	public CustomTableCellRenderer(RenderTableCellInfo aCellInfoGetter) {
+   /**
+    * Construct a renderer with one render rule.
+    * 
+    * @param aRenderRule
+    */
+	public CustomTableCellRenderer(RenderRule aRenderRule) {
 		super();
 		init();
-		_fontSetters.add(aCellInfoGetter);
+		_renderRules.add(aRenderRule);
 	}
 	
-	public CustomTableCellRenderer(Vector<RenderTableCellInfo> aCellInfoGetters) {
+	/**
+	 * Construct a renderer with a vector of render rules.
+	 * The rules will be applied in the order that they appear in the vector.
+	 * 
+	 * @param aRenderRules
+	 */
+	public CustomTableCellRenderer(Vector<RenderRule> aRenderRules) {
 		super();
 		init();
-		_fontSetters = aCellInfoGetters;
+		_renderRules = aRenderRules;
 	}
 	
+	/**
+	 * Apply the render rules to this table cell renderer and return a reference
+	 * to it.
+	 */
 	@Override
 	public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus, int row,
@@ -43,9 +65,15 @@ public class CustomTableCellRenderer extends JLabel
 	   Color tBackground = null;
 	   Color tForeground = null;
 
-	   for (RenderTableCellInfo tSetter: _fontSetters)
+	   /*
+	    * Loop through all render rules, and let them apply their changes to
+	    * this table cell renderer.
+	    */
+	   for (RenderRule tRule: _renderRules)
 	   {
-	      TableCellInfo tInfo = (TableCellInfo)tSetter.getInfo(this, table, value, isSelected, hasFocus, row, column);
+	      TableCellInfo tInfo = (TableCellInfo)tRule.getInfo(
+	            this, table, value, isSelected, hasFocus, row, column);
+
 	      if (tInfo != null)
 	      {
 	         if (tInfo._text != null)
@@ -120,6 +148,9 @@ public class CustomTableCellRenderer extends JLabel
 		return this;
 	}
 
+	/**
+	 * Initialize this table cell renderer.
+	 */
 	private void init(){
 		setOpaque(true);
 		setFont(getFont().deriveFont(Font.PLAIN));
