@@ -2,6 +2,10 @@ package bbj.swing.table.render;
 import java.awt.Color;
 import java.awt.Font;
 
+/**
+ * Class that provides information needed to render a table cell, including
+ * the text, font, and foreground and background colors.
+ */
 public class TableCellInfo
 {
    public String _text;

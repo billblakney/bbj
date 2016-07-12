@@ -37,12 +37,12 @@ public class TableCellColorSet {
 
 	public TableCellColorSet(TableCellColorSet aSet)
 	{
-	_bgNormal =    aSet._bgNormal;
-	_bgSelected =  aSet._bgSelected;
-	_bgFocus =     aSet._bgFocus;
-	_fgNormal =    aSet._fgNormal;
-	_fgSelected =  aSet._fgSelected;
-	_fgFocus =     aSet._fgFocus;
+	   _bgNormal =   aSet._bgNormal;
+	   _bgSelected = aSet._bgSelected;
+	   _bgFocus =    aSet._bgFocus;
+	   _fgNormal =   aSet._fgNormal;
+	   _fgSelected = aSet._fgSelected;
+	   _fgFocus =    aSet._fgFocus;
 	}
 
 	public TableCellColorSet(Color aBgNormal,Color aBgSelected,Color aBgFocus)
