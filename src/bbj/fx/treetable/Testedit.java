@@ -32,265 +32,293 @@ import javafx.util.converter.DoubleStringConverter;
  * Mainly demonstrates creating different types of columns of a treetable,
  * including making the columns editable.
  */
-public class Testedit extends Application implements
-      EventHandler<ActionEvent>, // for button press
+public class Testedit extends Application implements EventHandler<ActionEvent>, // for
+                                                                                // button
+                                                                                // press
       ChangeListener<Object> // for now to watch ratingsTotal
 {
-  Vector<TreeItem<TableEntry>> group1 = new Vector<TreeItem<TableEntry>>();
-  Vector<TreeItem<TableEntry>> group2 = new Vector<TreeItem<TableEntry>>();
+   /* The first top-level node in the treetable. */
+   TreeItem<TableEntry> topNode1;
 
-  Binding<Double> ratingsTotal;
-  TreeItem<TableEntry> groupB;
+   /* The child nodes of groupA. */
+   Vector<TreeItem<TableEntry>> childNodes1 = new Vector<TreeItem<TableEntry>>();
 
-  TreeItem<TableEntry> tChild4;
+   /* The second top-level node in the treetable. */
+   TreeItem<TableEntry> topNode2;
 
-  public static void main(String[] args)
-  {
-    Application.launch(args);
-  }
+   /* The value of the ratings total displayed in topNode2 */
+   Binding<Double> ratingsTotal;
 
-  @Override
-  public void start(Stage stage)
-  {
-    final Scene scene = new Scene(new Group(), 400, 300);
-    Group sceneRoot = (Group) scene.getRoot();
-    /*
-     * Create the child items, and add them to their respective summary nodes.
-     */
-    TreeItem<TableEntry> tItem;
-    int i = 1;
-    
-    tItem = new TreeItem<>(
-          new TableEntry(i++,"Joe",999l,10.0,new BigDecimal("9.99"),true));
-    group1.add(tItem);
+   /* The child nodes of groupB. */
+   Vector<TreeItem<TableEntry>> childNodes2 = new Vector<TreeItem<TableEntry>>();
 
-    tItem = new TreeItem<>(
-          new TableEntry(i++,"Mary",888l,99.0,new BigDecimal("7.99"),true));
-    group1.add(tItem);
+   /* TODO deprecate */
+   TreeItem<TableEntry> tChild4;
 
-    tItem = new TreeItem<>(
-          new TableEntry(i++,"Harris",777l,45.3,new BigDecimal("11.99"),true));
-    group1.add(tItem);
+   public static void main(String[] args)
+   {
+      Application.launch(args);
+   }
 
-    tItem = new TreeItem<>(
-          new TableEntry(i++,"Tanya",666l,33.3,new BigDecimal("33.99"),true));
-    group2.add(tItem);
+   @Override
+   public void start(Stage stage)
+   {
+      final Scene scene = new Scene(new Group(), 400, 300);
+      Group sceneRoot = (Group) scene.getRoot();
 
-    tItem = new TreeItem<>(
-          new TableEntry(i++,"Nancy",555l,0.2,new BigDecimal("1.09"),true));
-    group2.add(tItem);
+      /*
+       * Create the child items, and add them to their respective summary nodes.
+       */
+      TreeItem<TableEntry> tItem;
+      int i = 1;
 
-    /*
-     * Create the summary nodes.
-     */
-    TreeItem<TableEntry> groupA = new TreeItem<>(
-          new TableEntry(0,"Group A",444l,10.0,new BigDecimal("9.99"),true));
+      tItem = new TreeItem<>(new TableEntry(i++, "Joe", 999l, 10.0,
+            new BigDecimal("9.99"), true));
+      childNodes1.add(tItem);
 
-    groupA.getChildren().setAll(group1);
+      tItem = new TreeItem<>(new TableEntry(i++, "Mary", 888l, 99.0,
+            new BigDecimal("7.99"), true));
+      childNodes1.add(tItem);
 
-//---------------------------------      
-    ObservableList<TreeItem<TableEntry>> observableItems =
-          FXCollections.observableList(group2);
+      tItem = new TreeItem<>(new TableEntry(i++, "Harris", 777l, 45.3,
+            new BigDecimal("11.99"), true));
+      childNodes1.add(tItem);
 
-    ObservableList<SimpleDoubleProperty> ratings;
+      tItem = new TreeItem<>(new TableEntry(i++, "Tanya", 666l, 33.3,
+            new BigDecimal("33.99"), true));
+      childNodes2.add(tItem);
 
-    ratings = EasyBind.map(observableItems, (treeitem) -> {
-       return treeitem.getValue().someDoubleProperty();
-    });
+      tItem = new TreeItem<>(new TableEntry(i++, "Nancy", 555l, 0.2,
+            new BigDecimal("1.09"), true));
+      childNodes2.add(tItem);
 
-    for (SimpleDoubleProperty tInt: ratings)
-    {
-       System.out.println("score=" + tInt.intValue());
-    }
+      /*
+       * Create the summary node.
+       */
+      topNode1 = new TreeItem<>(new TableEntry(0, "Group A",
+            444l, 10.0, new BigDecimal("9.99"), true));
 
-    ratingsTotal = EasyBind.combine(
-          ratings,
-          stream -> stream.mapToDouble(Number::doubleValue).sum());
-    
-//TODO IP
-    ratingsTotal.addListener(this);
+      topNode1.getChildren().setAll(childNodes1);
 
-    System.out.println("SUM=" + ratingsTotal.getValue().toString());
-//---------------------------------      
+      // ---------------------------------
+      ObservableList<TreeItem<TableEntry>> observableItems = FXCollections
+            .observableList(childNodes2);
 
-    groupB = new TreeItem<>(
-          new TableEntry(0,"Group B",333l,ratingsTotal.getValue(),new BigDecimal("0.00"),true,1));
-    //TODO fix ctor workaround
+      ObservableList<SimpleDoubleProperty> ratings;
 
-    groupB.getChildren().setAll(group2);
-    
-    /*
-     * Create the root item.
-     */
-    TreeItem<TableEntry> root = new TreeItem<>(new TableEntry());
-    root.setExpanded(true);
-    
-    root.getChildren().setAll(groupA,groupB);
+      ratings = EasyBind.map(observableItems, (treeitem) -> {
+         return treeitem.getValue().someDoubleProperty();
+      });
 
-    /*
-     * Create the id column.
-     */
-    TreeTableColumn<TableEntry,Integer> idColumn = new TreeTableColumn<>("Id");
-    idColumn.setPrefWidth(100);
-    idColumn.setCellValueFactory(
-       new Callback<CellDataFeatures<TableEntry,Integer>,ObservableValue<Integer>>()
-       {
-          @Override public ObservableValue<Integer>
-          call(CellDataFeatures<TableEntry,Integer> p)
-          {
-             // Note: SimpleIntegerProperty implements ObservableValue<Number>,
-             // so must use this workaround.
-             return p.getValue().getValue().idProperty().asObject();
-          }
-       }
-     );
+      for (SimpleDoubleProperty tInt : ratings)
+      {
+         System.out.println("score=" + tInt.intValue());
+      }
 
-    /*
-     * Create the name column. Set it up to support editing.
-     */
-    TreeTableColumn<TableEntry,String> nameColumn = new TreeTableColumn<>("Some String");
-    nameColumn.setPrefWidth(100);
-    nameColumn.setCellValueFactory(
-       new Callback<CellDataFeatures<TableEntry,String>,ObservableValue<String>>()
-       {
-          @Override public ObservableValue<String>
-          call(CellDataFeatures<TableEntry,String> p)
-          {
-             return p.getValue().getValue().someStringProperty();
-          }
-       }
-     );
-    
-    // Add this to support editing. Otherwise, not needed.
-    nameColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+      ratingsTotal = EasyBind.combine(ratings,
+            stream -> stream.mapToDouble(Number::doubleValue).sum());
 
-    /*
-     * Create the value column. Set it up to support editing.
-     */
-    TreeTableColumn<TableEntry,Double> valueColumn = new TreeTableColumn<>("Some Double");
-    valueColumn.setPrefWidth(100);
+      // TODO IP
+      ratingsTotal.addListener(this);
 
-    boolean useShortWay = false;
-    if (useShortWay == true)
-    {
-       valueColumn.setCellValueFactory((p)-> 
-       p.getValue().getValue().someDoubleProperty().asObject()
-             );
-    }
-    else
-    {
-       valueColumn.setCellValueFactory(
-             new Callback<CellDataFeatures<TableEntry,Double>,ObservableValue<Double>>() {
-                @Override public ObservableValue<Double>
-                call(CellDataFeatures<TableEntry,Double> p)
-                {
-                   // ?Note: SimpleDoubleProperty implements ObservableValue<Number>,
-                   // so must use this workaround.
-                   return p.getValue().getValue().someDoubleProperty().asObject();
-                }
-             });
-    }
-    
-    // Add this to support editing. Otherwise, not needed.
-    valueColumn.setCellFactory(
-          TextFieldTreeTableCell.<TableEntry,Double>forTreeTableColumn(
-                new DoubleStringConverter()));
+      System.out.println("SUM=" + ratingsTotal.getValue().toString());
+      // ---------------------------------
 
-    /*
-     * Create the big decimal column. Set it up to support editing.
-     */
-    TreeTableColumn<TableEntry,BigDecimal> bonusColumn =
-          new TreeTableColumn<>("Bonus");
-    bonusColumn.setPrefWidth(100);
-    bonusColumn.setCellValueFactory((p)-> {
-          return p.getValue().getValue().someBigDecimalProperty(); });
-    
-    // Add this to support editing. Otherwise, not needed.
-    boolean useUpdateItem = true;
-    if (!useUpdateItem)
-    {
-       bonusColumn.setCellFactory(
-          TextFieldTreeTableCell.<TableEntry,BigDecimal>forTreeTableColumn(
-             new BigDecimalStringConverter()));
-    }
-    else
-    {
-       bonusColumn.setCellFactory((p)-> {
-          return new TextFieldTreeTableCell<TableEntry,BigDecimal>(
-                new BigDecimalStringConverter()) // need the converter to edit
-          {
-             @Override
-             public void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                DecimalFormat df = new DecimalFormat("#,###.0000");
-                if(empty || item == null){
-                   setText("");
-                } else {
-                   setText(df.format(item));
-                   this.setTextFill(Color.WHITE);
-                   setStyle("-fx-background-color: blue");
-                }
-             }
-             @Override public void startEdit() {
+      topNode2 = new TreeItem<>(new TableEntry(0, "Group B", 333l,
+            ratingsTotal.getValue(), new BigDecimal("0.00"), true, 1));
+      // TODO fix ctor workaround
 
-                super.startEdit();
-// could this block be useful? how?
-//                if (isEditing()) {
-//                   textField.textProperty().addListener(rtf);
-//                   if(getItem()!=null)
-//                    textField.setText(getItem().toString());
-//                      setGraphic(textField);
-//                      textField.selectAll();
-//                }
-             }
-          };}
-       );
-    }
-    
-    /*
-     * Create the boolean column.
-     */
-    TreeTableColumn<TableEntry,Boolean> awardColumn =
-          new TreeTableColumn<>( "Some Boolean" );
-    awardColumn.setCellValueFactory((p)-> p.getValue().getValue().someBooleanProperty());
-    awardColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(awardColumn));
-    
-    /*
-     * Create the tree table view.
-     */
-    TreeTableView<TableEntry> treeTableView = new TreeTableView<>(root);
-    treeTableView.setShowRoot(false);
-    treeTableView.setEditable(true);
-    nameColumn.setEditable(true);
-    valueColumn.setEditable(true);
-    bonusColumn.setEditable(true);
-    awardColumn.setEditable(true);
-    treeTableView.getColumns().add(idColumn);
-    treeTableView.getColumns().add(nameColumn);
-    treeTableView.getColumns().add(valueColumn);
-    treeTableView.getColumns().add(bonusColumn);
-    treeTableView.getColumns().add(awardColumn);
-    
-    Button dataButton = new Button("Data");
-    dataButton.setOnAction(this);   
+      topNode2.getChildren().setAll(childNodes2);
 
-    sceneRoot.getChildren().add(treeTableView);
-    sceneRoot.getChildren().add(dataButton);
-    stage.setScene(scene);
-    stage.show();
-  }
-  
-  @Override
-  public void changed(ObservableValue o,Object oldVal, Object newVal)
-  {
-     System.out.println("new ratingsTotal value: " + ratingsTotal.getValue());
-     groupB.getValue().setSomeDouble(ratingsTotal.getValue());
-  }
+      /*
+       * Create the root item.
+       */
+      TreeItem<TableEntry> root = new TreeItem<>(new TableEntry());
+      root.setExpanded(true);
 
-  @Override
-  public void handle(ActionEvent e)
-  {
-     System.out.println("HELLO");
-     System.out.println(tChild4.toString());
-  }
+      root.getChildren().setAll(topNode1, topNode2);
+
+      /*
+       * Create the id column.
+       */
+      TreeTableColumn<TableEntry, Integer> idColumn = new TreeTableColumn<>(
+            "Id");
+      idColumn.setPrefWidth(100);
+      idColumn
+            .setCellValueFactory(new Callback<CellDataFeatures<TableEntry, Integer>, ObservableValue<Integer>>()
+            {
+               @Override
+               public ObservableValue<Integer> call(
+                     CellDataFeatures<TableEntry, Integer> p)
+               {
+                  // Note: SimpleIntegerProperty implements
+                  // ObservableValue<Number>,
+                  // so must use this workaround.
+                  return p.getValue().getValue().idProperty().asObject();
+               }
+            });
+
+      /*
+       * Create the name column. Set it up to support editing.
+       */
+      TreeTableColumn<TableEntry, String> nameColumn = new TreeTableColumn<>(
+            "Some String");
+      nameColumn.setPrefWidth(100);
+      nameColumn
+            .setCellValueFactory(new Callback<CellDataFeatures<TableEntry, String>, ObservableValue<String>>()
+            {
+               @Override
+               public ObservableValue<String> call(
+                     CellDataFeatures<TableEntry, String> p)
+               {
+                  return p.getValue().getValue().someStringProperty();
+               }
+            });
+
+      // Add this to support editing. Otherwise, not needed.
+      nameColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+
+      /*
+       * Create the value column. Set it up to support editing.
+       */
+      TreeTableColumn<TableEntry, Double> valueColumn = new TreeTableColumn<>(
+            "Some Double");
+      valueColumn.setPrefWidth(100);
+
+      boolean useShortWay = false;
+      if (useShortWay == true)
+      {
+         valueColumn.setCellValueFactory((p) -> p.getValue().getValue()
+               .someDoubleProperty().asObject());
+      }
+      else
+      {
+         valueColumn
+               .setCellValueFactory(new Callback<CellDataFeatures<TableEntry, Double>, ObservableValue<Double>>()
+               {
+                  @Override
+                  public ObservableValue<Double> call(
+                        CellDataFeatures<TableEntry, Double> p)
+                  {
+                     // ?Note: SimpleDoubleProperty implements
+                     // ObservableValue<Number>,
+                     // so must use this workaround.
+                     return p.getValue().getValue().someDoubleProperty()
+                           .asObject();
+                  }
+               });
+      }
+
+      // Add this to support editing. Otherwise, not needed.
+      valueColumn
+            .setCellFactory(TextFieldTreeTableCell
+                  .<TableEntry, Double> forTreeTableColumn(new DoubleStringConverter()));
+
+      /*
+       * Create the big decimal column. Set it up to support editing.
+       */
+      TreeTableColumn<TableEntry, BigDecimal> bonusColumn = new TreeTableColumn<>(
+            "Bonus");
+      bonusColumn.setPrefWidth(100);
+      bonusColumn.setCellValueFactory((p) -> {
+         return p.getValue().getValue().someBigDecimalProperty();
+      });
+
+      // Add this to support editing. Otherwise, not needed.
+      boolean useUpdateItem = true;
+      if (!useUpdateItem)
+      {
+         bonusColumn
+               .setCellFactory(TextFieldTreeTableCell
+                     .<TableEntry, BigDecimal> forTreeTableColumn(new BigDecimalStringConverter()));
+      }
+      else
+      {
+         bonusColumn.setCellFactory((p) -> {
+            return new TextFieldTreeTableCell<TableEntry, BigDecimal>(
+                  new BigDecimalStringConverter()) // need the converter to edit
+               {
+                  @Override
+                  public void updateItem(BigDecimal item, boolean empty)
+                  {
+                     super.updateItem(item, empty);
+                     DecimalFormat df = new DecimalFormat("#,###.0000");
+                     if (empty || item == null)
+                     {
+                        setText("");
+                     }
+                     else
+                     {
+                        setText(df.format(item));
+                        this.setTextFill(Color.WHITE);
+                        setStyle("-fx-background-color: blue");
+                     }
+                  }
+
+                  @Override
+                  public void startEdit()
+                  {
+
+                     super.startEdit();
+                     // could this block be useful? how?
+                     // if (isEditing()) {
+                     // textField.textProperty().addListener(rtf);
+                     // if(getItem()!=null)
+                     // textField.setText(getItem().toString());
+                     // setGraphic(textField);
+                     // textField.selectAll();
+                     // }
+                  }
+               };
+            });
+      }
+
+      /*
+       * Create the boolean column.
+       */
+      TreeTableColumn<TableEntry, Boolean> awardColumn = new TreeTableColumn<>(
+            "Some Boolean");
+      awardColumn.setCellValueFactory((p) -> p.getValue().getValue()
+            .someBooleanProperty());
+      awardColumn.setCellFactory(CheckBoxTreeTableCell
+            .forTreeTableColumn(awardColumn));
+
+      /*
+       * Create the tree table view.
+       */
+      TreeTableView<TableEntry> treeTableView = new TreeTableView<>(root);
+      treeTableView.setShowRoot(false);
+      treeTableView.setEditable(true);
+      nameColumn.setEditable(true);
+      valueColumn.setEditable(true);
+      bonusColumn.setEditable(true);
+      awardColumn.setEditable(true);
+      treeTableView.getColumns().add(idColumn);
+      treeTableView.getColumns().add(nameColumn);
+      treeTableView.getColumns().add(valueColumn);
+      treeTableView.getColumns().add(bonusColumn);
+      treeTableView.getColumns().add(awardColumn);
+
+      Button dataButton = new Button("Data");
+      dataButton.setOnAction(this);
+
+      sceneRoot.getChildren().add(treeTableView);
+      sceneRoot.getChildren().add(dataButton);
+      stage.setScene(scene);
+      stage.show();
+   }
+
+   @Override
+   public void changed(ObservableValue o, Object oldVal, Object newVal)
+   {
+      System.out.println("new ratingsTotal value: " + ratingsTotal.getValue());
+      topNode2.getValue().setSomeDouble(ratingsTotal.getValue());
+   }
+
+   @Override
+   public void handle(ActionEvent e)
+   {
+      System.out.println("HELLO");
+      System.out.println(tChild4.toString());
+   }
 }
