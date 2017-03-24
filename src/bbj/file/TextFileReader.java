@@ -22,6 +22,34 @@ import java.util.Vector;
 public class TextFileReader<T>
 {
    /**
+    * Simple test. Edit name of text file for environment.
+    * @param args
+    */
+   public static void main(String[] args)
+   {
+      String tFilename = "M:/workspace/temp/test.txt";
+
+		TextFileReader<String> tReader =
+		      new TextFileReader<String>(
+		            tFilename,
+		            TextFileReader.kIdentityLineConverter,
+		            TextFileReader.kPoundCommentTest);
+		try
+		{
+		   Vector<String> tStrings = tReader.getVector();
+		   System.out.println("tStrings.size(): " + tStrings.size());
+		   for (String tString: tStrings)
+		   {
+		      System.out.println("line: " + tString);
+		   }
+		}
+      catch (IOException e)
+		{
+         System.out.println("IOException reading file");
+      }
+   }
+
+   /**
     * Interface used to convert a text file line to an instance of T.
     * @param <T> The type of instance to create from a text file line.
     */
@@ -37,9 +65,9 @@ public class TextFileReader<T>
 		            (line)->{return line;};
    
    /**
-    * Interface to decide if a text file line is a comment line.
+    * Interface to decide if a text file line meets some criteria.
     */
-   public interface CommentLineTest
+   public interface LineTest
    {
       public boolean isCommentLine(String aLine);
    }
@@ -47,7 +75,7 @@ public class TextFileReader<T>
    /**
     * Test that considers lines that start with "#" to be comment lines.
     */
-   public static final CommentLineTest kPoundCommentTest = 
+   public static final LineTest kPoundCommentTest = 
 		            (line)->((line.charAt(0) == '#')?true:false);
    
    /** Name of text file to convert to objects. */
@@ -57,7 +85,10 @@ public class TextFileReader<T>
    private LineConverter<T> lineConverter;
    
    /** The comment line tester. Can be null for no test. */
-   private CommentLineTest commentLineTest;
+   private LineTest commentLineTest;
+   
+   /** The terminator line tester. Can be null for no test. */
+   private LineTest terminateLineTest;
 
    /**
     * Constructs a text file reader.
@@ -77,7 +108,7 @@ public class TextFileReader<T>
     * @param aCommentLineTest
     */
    public TextFileReader(String aFileName,LineConverter<T> aLineConverter,
-         CommentLineTest aCommentLineTest)
+         LineTest aCommentLineTest)
    {
       filename = aFileName;
       commentLineTest = aCommentLineTest;
@@ -121,33 +152,5 @@ public class TextFileReader<T>
       }
       
       return vector;
-   }
-
-   /**
-    * Simple test. Edit name of text file for environment.
-    * @param args
-    */
-   public static void main(String[] args)
-   {
-      String tFilename = "M:/workspace/temp/test.txt";
-
-		TextFileReader<String> tReader =
-		      new TextFileReader<String>(
-		            tFilename,
-		            TextFileReader.kIdentityLineConverter,
-		            TextFileReader.kPoundCommentTest);
-		try
-		{
-		   Vector<String> tStrings = tReader.getVector();
-		   System.out.println("tStrings.size(): " + tStrings.size());
-		   for (String tString: tStrings)
-		   {
-		      System.out.println("line: " + tString);
-		   }
-		}
-      catch (IOException e)
-		{
-         System.out.println("IOException reading file");
-      }
    }
 }
