@@ -14,40 +14,16 @@ import java.util.Vector;
  * file, converts them into objects, and stores them in a Vector, which is
  * returned to the caller.
  *
- * The file to be read can contain comment lines (which will not be converted
- * to objects). By default, comment lines are indicated by a "#" character in
+ * The file to be read can contain comment lines and/or terminating lines.
+ * A comment line, which matches the comment line test, is ignored.
+ * When a terminating line, which matches the terminating line test, is
+ * encountered, that line and all of the ones that follow it are ignored.
+ * By default, comment lines are indicated by a "#" character in
  * the first position (after the line is "trimmed").  This criteria can be
  * modified by overriding the 'isCommentLine' method.
  */
 public class TextFileReader<T>
 {
-   /**
-    * Simple test. Edit name of text file for environment.
-    * @param args
-    */
-   public static void main(String[] args)
-   {
-      String tFilename = "M:/workspace/temp/test.txt";
-
-		TextFileReader<String> tReader =
-		      new TextFileReader<String>(
-		            tFilename,
-		            TextFileReader.kIdentityLineConverter,
-		            TextFileReader.kPoundCommentTest);
-		try
-		{
-		   Vector<String> tStrings = tReader.getVector();
-		   System.out.println("tStrings.size(): " + tStrings.size());
-		   for (String tString: tStrings)
-		   {
-		      System.out.println("line: " + tString);
-		   }
-		}
-      catch (IOException e)
-		{
-         System.out.println("IOException reading file");
-      }
-   }
 
    /**
     * Interface used to convert a text file line to an instance of T.
@@ -69,7 +45,7 @@ public class TextFileReader<T>
     */
    public interface LineTest
    {
-      public boolean isCommentLine(String aLine);
+      public boolean matches(String aLine);
    }
    
    /**
@@ -116,6 +92,25 @@ public class TextFileReader<T>
    }
 
    /**
+    * Set the comment line test.
+    * @param aTest Line tester to identify comment lines.
+    */
+   public void setCommentLineTest(LineTest aTest)
+   {
+      commentLineTest = aTest;
+   }
+
+   /**
+    * Set the terminating line test.
+    * When a terminating line is encountered, processing of the file is stopped.
+    * @param aTest Line tester to identify a terminating line.
+    */
+   public void setTerminateLineTest(LineTest aTest)
+   {
+      terminateLineTest = aTest;
+   }
+
+   /**
     * Converts the lines of the text file into a vector of T instances.
     * If a comment line test was provided at construction, the comment lines
     * are ignored.
@@ -132,10 +127,22 @@ public class TextFileReader<T>
          String line;
          while ( (line = lineReader.readLine()) != null)
          {
-            //System.out.println(line);
-            if (commentLineTest != null
-                  && commentLineTest.isCommentLine(line) == false)
+//            System.out.println(line);
+            if (terminateLineTest != null
+                  && terminateLineTest.matches(line))
             {
+//               System.out.println("is terminating line");
+               break;
+            }
+            else if (commentLineTest != null
+                  && commentLineTest.matches(line))
+            {
+//               System.out.println("is comment line");
+               continue;
+            }
+            else
+            {
+//               System.out.println("is convertible line");
                T t = lineConverter.convertLine(line);
                vector.addElement(t);
             }

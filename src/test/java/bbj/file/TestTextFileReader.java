@@ -20,6 +20,10 @@ public class TestTextFileReader
                tFilename,
                TextFileReader.kIdentityLineConverter,
                TextFileReader.kPoundCommentTest);
+
+         tReader.setTerminateLineTest(
+               (line)->((line.charAt(0)=='@')?true:false));
+
          try
          {
             Vector<String> tStrings = tReader.getVector();

@@ -4,4 +4,7 @@ this is line2
 this is line3
 this is line4
   # another comment line
-this is line5
+this is the last line to be converted
+@ this is a terminating line
+lines beyond
+lines beyond
