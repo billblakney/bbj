@@ -32,9 +32,8 @@ import javafx.util.converter.DoubleStringConverter;
  * Mainly demonstrates creating different types of columns of a treetable,
  * including making the columns editable.
  */
-public class Testedit extends Application implements EventHandler<ActionEvent>, // for
-                                                                                // button
-                                                                                // press
+public class Testedit extends Application implements
+      EventHandler<ActionEvent>, // for button press
       ChangeListener<Object> // for now to watch ratingsTotal
 {
    /* The first top-level node in the treetable. */
@@ -72,6 +71,8 @@ public class Testedit extends Application implements EventHandler<ActionEvent>, 
       TreeItem<TableEntry> tItem;
       int i = 1;
 
+      // childNodes1
+      
       tItem = new TreeItem<>(new TableEntry(i++, "Joe", 999l, 10.0,
             new BigDecimal("9.99"), true));
       childNodes1.add(tItem);
@@ -84,6 +85,8 @@ public class Testedit extends Application implements EventHandler<ActionEvent>, 
             new BigDecimal("11.99"), true));
       childNodes1.add(tItem);
 
+      // childNodes2
+      
       tItem = new TreeItem<>(new TableEntry(i++, "Tanya", 666l, 33.3,
             new BigDecimal("33.99"), true));
       childNodes2.add(tItem);
@@ -93,7 +96,7 @@ public class Testedit extends Application implements EventHandler<ActionEvent>, 
       childNodes2.add(tItem);
 
       /*
-       * Create the summary node.
+       * Create the summary node1.
        */
       topNode1 = new TreeItem<>(new TableEntry(0, "Group A",
             444l, 10.0, new BigDecimal("9.99"), true));
@@ -101,8 +104,8 @@ public class Testedit extends Application implements EventHandler<ActionEvent>, 
       topNode1.getChildren().setAll(childNodes1);
 
       // ---------------------------------
-      ObservableList<TreeItem<TableEntry>> observableItems = FXCollections
-            .observableList(childNodes2);
+      ObservableList<TreeItem<TableEntry>> observableItems =
+            FXCollections.observableList(childNodes2);
 
       ObservableList<SimpleDoubleProperty> ratings;
 
